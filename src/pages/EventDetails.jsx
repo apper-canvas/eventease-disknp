@@ -675,15 +675,15 @@ export default function EventDetails() {
                 onClick={handleReserve}
                 whileHover={!reservingTicket ? { scale: 1.03 } : {}}
                 whileTap={!reservingTicket ? { scale: 0.97 } : {}}
-              >
+              > 
                 {reservingTicket ? (
                   <div className="flex items-center justify-center">
                     <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin mr-3"></div>
                     Processing...
               </motion.button>
-                ) : (
                   <span className="flex items-center justify-center"><ShoppingCartIcon size={18} className="mr-2" />Reserve Now · ${calculateTotal().toFixed(2)}</span>
               </motion.button>
+                )}
               <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
               <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
                 <InfoIcon size={16} className="mr-2" />
