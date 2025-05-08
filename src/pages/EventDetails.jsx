@@ -351,14 +351,14 @@ export default function EventDetails() {
                 {event.imageUrl && (
                   <div className="card p-6 md:p-8">
                     <h2 className="text-2xl font-bold mb-6">Event Gallery</h2>
-                
-                {event.imageUrl && (
-                  <div className="mt-8 rounded-xl overflow-hidden">
-                    <img 
-                      src={event.imageUrl} 
-                      alt={event.title} 
-                      className="w-full h-auto object-cover"
-                    />
+                    
+                    <div className="mt-8 rounded-xl overflow-hidden">
+                      <img 
+                        src={event.imageUrl} 
+                        alt={event.title} 
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
                   </div>
                 )}
 
