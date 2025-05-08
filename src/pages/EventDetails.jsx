@@ -598,6 +598,7 @@ export default function EventDetails() {
               </h2>
 
               <div className="space-y-4 mb-6">
+                {event.ticketOptions.map((ticket) => (
                   <motion.div 
                     key={ticket.id}
                     className={`border-2 rounded-xl p-4 transition-all ${
@@ -613,7 +614,8 @@ export default function EventDetails() {
                         <span className="font-bold text-xl text-primary dark:text-primary-light">
                           ${ticket.price.toFixed(2)}
                         </span>
-                        Selected
+                      </div>
+                      
                       <p className="text-surface-600 dark:text-surface-400 text-sm mb-3">
                         {ticket.description}
                       </p>
@@ -657,7 +659,6 @@ export default function EventDetails() {
                       </div>
                     </div>
                   </motion.div>
-                        </motion.div>
                 ))}
               </div>
               <div className="border-t border-surface-200 dark:border-surface-700 pt-4 mb-4">
@@ -667,8 +668,8 @@ export default function EventDetails() {
                 </div>
               </div>
 
-
-              <motion.button 
+              <motion.button
+                className="btn btn-primary w-full"
                 disabled={reservingTicket || Object.values(ticketQuantities).every(qty => qty === 0)}
                 disabled={reservingTicket || !selectedTicket}
                 onClick={handleReserve}
@@ -679,12 +680,11 @@ export default function EventDetails() {
                   <div className="flex items-center justify-center">
                     <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin mr-3"></div>
                     Processing...
-                  </div>
-                    Processing Order...
               </motion.button>
                 ) : (
                   <span className="flex items-center justify-center"><ShoppingCartIcon size={18} className="mr-2" />Reserve Now · ${calculateTotal().toFixed(2)}</span>
-                )}
+              </motion.button>
+              <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
               <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
                 <InfoIcon size={16} className="mr-2" />
                 <p className="text-sm">Secure payment processed by EventEase</p>
