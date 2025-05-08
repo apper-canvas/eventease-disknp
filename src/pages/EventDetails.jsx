@@ -113,6 +113,7 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ticketQuantities, setTicketQuantities] = useState({});
   const [reservingTicket, setReservingTicket] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
   const { scrollY } = useScroll();
@@ -131,6 +132,9 @@ export default function EventDetails() {
   const CompassIcon = getIcon('Compass');
   const ArrowLeftIcon = getIcon('ArrowLeft');
   const CheckCircleIcon = getIcon('CheckCircle');
+  const PlusIcon = getIcon('Plus');
+  const MinusIcon = getIcon('Minus');
+  const ShoppingCartIcon = getIcon('ShoppingCart');
 
   useEffect(() => {
     // Simulate API call to fetch event details
@@ -142,6 +146,10 @@ export default function EventDetails() {
         // Set the first ticket option as default
         if (foundEvent.ticketOptions && foundEvent.ticketOptions.length > 0) {
           setSelectedTicket(foundEvent.ticketOptions[0].id);
+          // Initialize ticket quantities
+          const quantities = {};
+          foundEvent.ticketOptions.forEach(ticket => quantities[ticket.id] = 0);
+          setTicketQuantities(quantities);
         }
       }
       setLoading(false);
@@ -169,6 +177,27 @@ export default function EventDetails() {
     });
   };
 
+  const handleIncreaseQuantity = (ticketId) => {
+    setTicketQuantities(prev => ({
+      ...prev,
+      [ticketId]: Math.min((prev[ticketId] || 0) + 1, 10) // Max 10 tickets per type
+    }));
+  };
+
+  const handleDecreaseQuantity = (ticketId) => {
+    setTicketQuantities(prev => ({
+      ...prev,
+      [ticketId]: Math.max((prev[ticketId] || 0) - 1, 0)
+    }));
+  };
+
+  const calculateTotal = () => {
+    if (!event) return 0;
+    return event.ticketOptions.reduce((total, ticket) => {
+      return total + (ticket.price * (ticketQuantities[ticket.id] || 0));
+    }, 0);
+  };
+
   const handleReserve = () => {
       if (!selectedTicket) {
         toast.error(
@@ -179,7 +208,22 @@ export default function EventDetails() {
         );
         return;
       }
-      
+
+      // Check if any tickets are selected
+      const totalTickets = Object.values(ticketQuantities).reduce((sum, qty) => sum + qty, 0);
+      if (totalTickets === 0) {
+        toast.error(
+          <div className="flex items-center">
+            <span>Please select at least one ticket</span>
+          </div>,
+          { className: "font-medium" }
+        );
+        return;
+      }
+
+      // Get selected tickets with quantities
+      const selectedTickets = event.ticketOptions.filter(t => ticketQuantities[t.id] > 0);
+
       setReservingTicket(true);
       
       // Simulate API call with a short delay
@@ -191,7 +235,8 @@ export default function EventDetails() {
             <CheckCircleIcon className="mr-2 flex-shrink-0" size={18} />
             <div>
               <p className="font-bold">Ticket Reserved!</p>
-              <p className="text-sm">{ticketOption.name} for {event.title}</p>
+              <p className="text-sm">{totalTickets} ticket(s) for {event.title}</p>
+              <p className="text-sm font-medium">Total: ${calculateTotal().toFixed(2)}</p>
             </div>
           </div>,
           { className: "font-medium", autoClose: 5000 }
@@ -553,37 +598,78 @@ export default function EventDetails() {
               </h2>
 
               <div className="space-y-4 mb-6">
-                {event.ticketOptions.map(ticket => (
-                        <motion.div 
+                  <motion.div 
                     key={ticket.id}
-                          className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                      selectedTicket === ticket.id 
-                              ? 'border-primary dark:border-primary-light bg-primary/5 dark:bg-primary-dark/10' 
-                              : 'border-surface-200 dark:border-surface-700 hover:border-primary/50 dark:hover:border-primary-light/50'
+                    className={`border-2 rounded-xl p-4 transition-all ${
+                      ticketQuantities[ticket.id] > 0
+                        ? 'border-primary dark:border-primary-light bg-primary/5 dark:bg-primary-dark/10' 
+                        : 'border-surface-200 dark:border-surface-700'
                     }`}
-                    onClick={() => setSelectedTicket(ticket.id)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                    <div className="flex items-center justify-between mb-1">
-                            <h3 className="font-bold text-lg">{ticket.name}</h3>
-                            <span className="font-bold text-xl text-primary dark:text-primary-light">${ticket.price.toFixed(2)}</span>
-                    </div>
-                    <p className="text-surface-600 dark:text-surface-400 text-sm">
-                      {ticket.description}
-                    </p>
-                    {selectedTicket === ticket.id && (
-                            <div className="text-primary dark:text-primary-light font-medium mt-3 flex items-center">
-                              <CheckCircleIcon size={18} className="mr-2" />
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="flex flex-col">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-bold text-lg">{ticket.name}</h3>
+                        <span className="font-bold text-xl text-primary dark:text-primary-light">
+                          ${ticket.price.toFixed(2)}
+                        </span>
                         Selected
+                      <p className="text-surface-600 dark:text-surface-400 text-sm mb-3">
+                        {ticket.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center">
+                          <motion.button
+                            type="button"
+                            className="bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 h-8 w-8 rounded-l-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => handleDecreaseQuantity(ticket.id)}
+                            disabled={ticketQuantities[ticket.id] <= 0}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <MinusIcon size={16} />
+                          </motion.button>
+                          <div className="h-8 bg-white dark:bg-surface-800 flex items-center justify-center px-4 border-t border-b border-surface-200 dark:border-surface-700">
+                            <span className="font-medium w-4 text-center">
+                              {ticketQuantities[ticket.id] || 0}
+                            </span>
+                          </div>
+                          <motion.button
+                            type="button"
+                            className="bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 h-8 w-8 rounded-r-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => handleIncreaseQuantity(ticket.id)}
+                            disabled={ticketQuantities[ticket.id] >= 10}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <PlusIcon size={16} />
+                          </motion.button>
+                        </div>
+                        
+                        {ticketQuantities[ticket.id] > 0 && (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="font-medium text-primary dark:text-primary-light"
+                          >
+                            ${(ticket.price * ticketQuantities[ticket.id]).toFixed(2)}
+                          </motion.div>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  </motion.div>
                         </motion.div>
                 ))}
               </div>
+              <div className="border-t border-surface-200 dark:border-surface-700 pt-4 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total</span>
+                  <span className="font-bold text-xl">${calculateTotal().toFixed(2)}</span>
+                </div>
+              </div>
+
 
               <motion.button 
-                className="btn btn-primary w-full text-lg font-semibold" 
+                disabled={reservingTicket || Object.values(ticketQuantities).every(qty => qty === 0)}
                 disabled={reservingTicket || !selectedTicket}
                 onClick={handleReserve}
                 whileHover={!reservingTicket ? { scale: 1.03 } : {}}
@@ -594,9 +680,11 @@ export default function EventDetails() {
                     <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin mr-3"></div>
                     Processing...
                   </div>
-                ) : 'Reserve Now'}
+                    Processing Order...
               </motion.button>
-
+                ) : (
+                  <span className="flex items-center justify-center"><ShoppingCartIcon size={18} className="mr-2" />Reserve Now · ${calculateTotal().toFixed(2)}</span>
+                )}
               <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
                 <InfoIcon size={16} className="mr-2" />
                 <p className="text-sm">Secure payment processed by EventEase</p>
