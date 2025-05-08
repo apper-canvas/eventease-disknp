@@ -325,14 +325,32 @@ export default function EventDetails() {
           <div className="lg:col-span-2 space-y-6">
             {/* About Tab */}
             {activeTab === 'about' && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="card p-6 md:p-8"
+                className="space-y-6"
               >
-                <h2 className="text-2xl font-bold mb-6">About This Event</h2>
-                <p className="text-surface-800 dark:text-surface-200 whitespace-pre-line leading-relaxed">
-                  {event.longDescription || event.description}
+                <div className="card p-6 md:p-8">
+                  <h1 className="text-2xl md:text-3xl font-bold mb-4 text-surface-900 dark:text-surface-50">
+                    {event.title}
+                  </h1>
+                  <div className="flex items-center mb-6">
+                    <span className="px-3 py-1 bg-primary/10 dark:bg-primary-dark/20 text-primary dark:text-primary-light rounded-full text-sm font-medium">
+                      {event.category.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="card p-6 md:p-8">
+                  <h2 className="text-2xl font-bold mb-6">About This Event</h2>
+                  <p className="text-surface-800 dark:text-surface-200 whitespace-pre-line leading-relaxed">
+                    {event.longDescription || event.description}
+                  </p>
+                </div>
+
+                {event.imageUrl && (
+                  <div className="card p-6 md:p-8">
+                    <h2 className="text-2xl font-bold mb-6">Event Gallery</h2>
                 </p>
                 {event.imageUrl && (
                   <div className="mt-8 rounded-xl overflow-hidden">
@@ -343,6 +361,7 @@ export default function EventDetails() {
                     />
                   </div>
                 )}
+
               </motion.div>
             )}
 
@@ -451,51 +470,49 @@ export default function EventDetails() {
                 className="card p-6 md:p-8"
               >
                 <h2 className="text-2xl font-bold mb-6">Event Organizer</h2>
-          <button 
-                  className="flex items-start w-full"
-                >
-                  <div className="flex items-start">
-                    {event.organizer.logo ? (
-                      <img 
-                        src={event.organizer.logo} 
-                        alt={event.organizer.name} 
-                        className="w-20 h-20 rounded-xl object-cover mr-5"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 rounded-xl bg-primary/10 dark:bg-primary-dark/20 flex items-center justify-center mr-5">
-                        <UserIcon size={32} className="text-primary dark:text-primary-light" />
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="font-bold text-xl">{event.organizer.name}</h3>
-                      <p className="text-surface-600 dark:text-surface-400 mt-1 mb-4 leading-relaxed">
-                        {event.organizer.description}
-                      </p>
-                      
-                      <div className="space-y-3">
-                        <a 
-                          href={`mailto:${event.organizer.contactEmail}`} 
-                          className="flex items-center py-2 px-3 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
-                        >
-                          <div className="bg-white dark:bg-surface-600 p-1.5 rounded-md mr-3 text-primary dark:text-primary-light">
-                            <MailIcon size={18} />
-                          </div>
-                          <span className="font-medium">{event.organizer.contactEmail}</span>
-                        </a>
-                        
-                        <a 
-                          href={`tel:${event.organizer.contactPhone}`}
-                          className="flex items-center py-2 px-3 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
-                        >
-                          <div className="bg-white dark:bg-surface-600 p-1.5 rounded-md mr-3 text-primary dark:text-primary-light">
-                            <PhoneIcon size={18} />
-                          </div>
-                          <span className="font-medium">{event.organizer.contactPhone}</span>
-                        </a>
-                      </div>
+                <div className="flex items-start">
+                  {event.organizer.logo ? (
+                    <img 
+                      src={event.organizer.logo} 
+                      alt={event.organizer.name} 
+                      className="w-20 h-20 rounded-xl object-cover mr-5"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl bg-primary/10 dark:bg-primary-dark/20 flex items-center justify-center mr-5">
+                      <UserIcon size={32} className="text-primary dark:text-primary-light" />
                     </div>
-            </div>
-                </button>
+                  )}
+                  <div>
+                    <h3 className="font-bold text-xl text-surface-900 dark:text-surface-50">
+                      {event.organizer.name}
+                    </h3>
+                    <p className="text-surface-600 dark:text-surface-400 mt-1 mb-4 leading-relaxed">
+                      {event.organizer.description}
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <a 
+                        href={`mailto:${event.organizer.contactEmail}`} 
+                        className="flex items-center py-2 px-3 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
+                      >
+                        <div className="bg-white dark:bg-surface-600 p-1.5 rounded-md mr-3 text-primary dark:text-primary-light">
+                          <MailIcon size={18} />
+                        </div>
+                        <span className="font-medium">{event.organizer.contactEmail}</span>
+                      </a>
+                      
+                      <a 
+                        href={`tel:${event.organizer.contactPhone}`}
+                        className="flex items-center py-2 px-3 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
+                      >
+                        <div className="bg-white dark:bg-surface-600 p-1.5 rounded-md mr-3 text-primary dark:text-primary-light">
+                          <PhoneIcon size={18} />
+                        </div>
+                        <span className="font-medium">{event.organizer.contactPhone}</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             )}
           </div>
