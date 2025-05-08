@@ -396,9 +396,8 @@ export default function MainFeature() {
             onChange={handleChange}
             placeholder="Where will the event be held?"
             className={`input-field pl-10 ${errors.location ? 'border-red-500 dark:border-red-500' : ''}`}
-          />
-        </div>
-        {errors.location && (
+                          </div>
+                        </div>
           <p className="mt-1 text-sm text-red-500">{errors.location}</p>
         )}
       </div>
