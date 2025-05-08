@@ -169,36 +169,36 @@ export default function EventDetails() {
     });
   };
 
-    if (!selectedTicket) {
-      toast.error(
-        <div className="flex items-center">
-          <span>Please select a ticket type</span>
-        </div>,
-        { className: "font-medium" }
-      );
-      return;
-    }
-    
-    setReservingTicket(true);
-    
-    // Simulate API call with a short delay
-    setTimeout(() => {
-      const ticketOption = event.ticketOptions.find(t => t.id === selectedTicket);
+  const handleReserve = () => {
+      if (!selectedTicket) {
+        toast.error(
+          <div className="flex items-center">
+            <span>Please select a ticket type</span>
+          </div>,
+          { className: "font-medium" }
+        );
+        return;
+      }
       
-      toast.success(
-        <div className="flex items-center">
-          <CheckCircleIcon className="mr-2 flex-shrink-0" size={18} />
-          <div>
-            <p className="font-bold">Ticket Reserved!</p>
-            <p className="text-sm">{ticketOption.name} for {event.title}</p>
-          </div>
-        </div>,
-        { className: "font-medium", autoClose: 5000 }
-      );
+      setReservingTicket(true);
       
-      setReservingTicket(false);
-    }, 1500);
-      { className: "font-medium" });
+      // Simulate API call with a short delay
+      setTimeout(() => {
+        const ticketOption = event.ticketOptions.find(t => t.id === selectedTicket);
+        
+        toast.success(
+          <div className="flex items-center">
+            <CheckCircleIcon className="mr-2 flex-shrink-0" size={18} />
+            <div>
+              <p className="font-bold">Ticket Reserved!</p>
+              <p className="text-sm">{ticketOption.name} for {event.title}</p>
+            </div>
+          </div>,
+          { className: "font-medium", autoClose: 5000 }
+        );
+        
+        setReservingTicket(false);
+      }, 1500);
   };
 
   if (loading) {
