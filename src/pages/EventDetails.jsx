@@ -362,6 +362,7 @@ export default function EventDetails() {
                   </div>
                 )}
 
+                </div>
               </motion.div>
             )}
 
