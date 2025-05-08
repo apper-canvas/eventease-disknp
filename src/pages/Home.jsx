@@ -95,7 +95,6 @@ export default function Home() {
       toast.info("Showing all events");
     } else {
       const category = eventCategories.find(cat => cat.id === categoryId);
-      const category = eventCategories.find(cat => cat.id === categoryId);
     }
   };
   
