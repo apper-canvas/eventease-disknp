@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 import getIcon from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 
@@ -95,7 +95,7 @@ export default function Home() {
       toast.info("Showing all events");
     } else {
       const category = eventCategories.find(cat => cat.id === categoryId);
-      toast.info(`Showing ${category?.name || ''} events`);
+      const category = eventCategories.find(cat => cat.id === categoryId);
     }
   };
   
@@ -260,13 +260,13 @@ export default function Home() {
                       <span className="truncate">{event.location}</span>
                     </div>
                     
-                    <button 
-                      className="w-full btn btn-primary flex items-center justify-center"
-                      onClick={() => toast.success(`Tickets for ${event.title} added to cart!`)}
+                    <Link 
+                      to={`/event/${event.id}`}
+                      className="w-full btn btn-primary flex items-center justify-center no-underline"
                     >
                       <TicketIcon size={16} className="mr-2" />
                       Get Tickets
-                    </button>
+                    </Link>
                   </div>
                 </motion.div>
               ))

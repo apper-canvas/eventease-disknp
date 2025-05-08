@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import EventDetails from './pages/EventDetails';
 import getIcon from './utils/iconUtils';
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
           >
             <Routes location={location}>
               <Route path="/" element={<Home />} />
+              <Route path="/event/:id" element={<EventDetails />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </motion.div>
