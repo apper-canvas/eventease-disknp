@@ -113,6 +113,7 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [reservingTicket, setReservingTicket] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
   const { scrollY } = useScroll();
   const [loading, setLoading] = useState(true);
@@ -168,13 +169,35 @@ export default function EventDetails() {
     });
   };
 
-  const handleReserve = () => {
-    const ticketOption = event.ticketOptions.find(t => t.id === selectedTicket);
-    toast.success(
-      <div className="flex items-center">
-        <CheckCircleIcon className="mr-2 flex-shrink-0" size={18} />
-        <span>Reserved {ticketOption.name} ticket for {event.title}!</span>
-      </div>,
+    if (!selectedTicket) {
+      toast.error(
+        <div className="flex items-center">
+          <span>Please select a ticket type</span>
+        </div>,
+        { className: "font-medium" }
+      );
+      return;
+    }
+    
+    setReservingTicket(true);
+    
+    // Simulate API call with a short delay
+    setTimeout(() => {
+      const ticketOption = event.ticketOptions.find(t => t.id === selectedTicket);
+      
+      toast.success(
+        <div className="flex items-center">
+          <CheckCircleIcon className="mr-2 flex-shrink-0" size={18} />
+          <div>
+            <p className="font-bold">Ticket Reserved!</p>
+            <p className="text-sm">{ticketOption.name} for {event.title}</p>
+          </div>
+        </div>,
+        { className: "font-medium", autoClose: 5000 }
+      );
+      
+      setReservingTicket(false);
+    }, 1500);
       { className: "font-medium" });
   };
 
@@ -561,11 +584,17 @@ export default function EventDetails() {
 
               <motion.button 
                 className="btn btn-primary w-full text-lg font-semibold" 
+                disabled={reservingTicket || !selectedTicket}
                 onClick={handleReserve}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                Reserve Now
+                whileHover={!reservingTicket ? { scale: 1.03 } : {}}
+                whileTap={!reservingTicket ? { scale: 0.97 } : {}}
+              >
+                {reservingTicket ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin mr-3"></div>
+                    Processing...
+                  </div>
+                ) : 'Reserve Now'}
               </motion.button>
 
               <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
