@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { toast } from 'react-toastify';
 import getIcon from '../utils/iconUtils';
 
@@ -113,6 +113,8 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [activeTab, setActiveTab] = useState('about');
+  const { scrollY } = useScroll();
   const [loading, setLoading] = useState(true);
 
   // Icons
@@ -124,7 +126,10 @@ export default function EventDetails() {
   const MailIcon = getIcon('Mail');
   const PhoneIcon = getIcon('Phone');
   const CheckIcon = getIcon('Check');
+  const UserIcon = getIcon('User');
+  const CompassIcon = getIcon('Compass');
   const ArrowLeftIcon = getIcon('ArrowLeft');
+  const CheckCircleIcon = getIcon('CheckCircle');
 
   useEffect(() => {
     // Simulate API call to fetch event details
@@ -141,6 +146,9 @@ export default function EventDetails() {
       setLoading(false);
     }, 800);
   }, [id]);
+
+  // Parallax effect for hero image
+  const heroImageY = useTransform(scrollY, [0, 300], [0, 100]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -162,7 +170,12 @@ export default function EventDetails() {
 
   const handleReserve = () => {
     const ticketOption = event.ticketOptions.find(t => t.id === selectedTicket);
-    toast.success(`Reserved ${ticketOption.name} ticket for ${event.title}!`);
+    toast.success(
+      <div className="flex items-center">
+        <CheckCircleIcon className="mr-2 flex-shrink-0" size={18} />
+        <span>Reserved {ticketOption.name} ticket for {event.title}!</span>
+      </div>,
+      { className: "font-medium" });
   };
 
   if (loading) {
@@ -191,171 +204,358 @@ export default function EventDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-900 pb-12">
+    <div className="min-h-screen bg-surface-50 dark:bg-surface-900 pb-12 overflow-hidden">
       {/* Hero Image */}
-      <div className="relative h-64 md:h-96 overflow-hidden">
-        <img 
-          src={event.imageUrl} 
-          alt={event.title} 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <button 
-            onClick={() => navigate('/')} 
-            className="mb-4 flex items-center text-white hover:text-primary-light transition-colors"
-          >
-            <ArrowLeftIcon size={20} className="mr-2" />
-            Back to Events
-          </button>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">{event.title}</h1>
+      <motion.div className="relative h-64 md:h-[400px] lg:h-[500px] overflow-hidden">
+        <motion.div style={{ y: heroImageY }} className="absolute inset-0">
+          <img 
+            src={event.imageUrl} 
+            alt={event.title} 
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20"></div>
+        </motion.div>
+        
+        <div className="absolute inset-0 flex flex-col justify-between">
+          <div className="p-6">
+            <motion.button 
+              onClick={() => navigate('/')} 
+              className="flex items-center text-white hover:text-primary-light transition-colors bg-black/30 px-4 py-2 rounded-full"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeftIcon size={18} className="mr-2" />
+              Back to Events
+            </motion.button>
+          </div>
+          
+          <div className="p-6 md:p-10 max-w-4xl">
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-white/90 text-sm font-medium mb-2 uppercase tracking-wider"
+            >
+              {event.category.toUpperCase()} EVENT
+            </motion.p>
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-3xl md:text-5xl font-bold text-white mb-4"
+            >
+              {event.title}
+            </motion.h1>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-wrap items-center gap-4 text-white/90"
+            >
+              <div className="flex items-center">
+                <CalendarIcon size={18} className="mr-2" />
+                <span>{formatDate(event.date)}</span>
+              </div>
+              <div className="flex items-center">
+                <ClockIcon size={18} className="mr-2" />
+                <span>{formatTime(event.date)}</span>
+              </div>
+              <div className="flex items-center">
+                <MapPinIcon size={18} className="mr-2" />
+                <span>{event.location}</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Tab Navigation */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-surface-800 shadow-sm transition-all border-b border-surface-200 dark:border-surface-700">
+        <div className="container mx-auto px-4">
+          <div className="flex overflow-x-auto scrollbar-hide">
+            <button 
+              onClick={() => setActiveTab('about')}
+              className={`py-4 px-6 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${
+                activeTab === 'about' 
+                  ? 'border-primary text-primary dark:border-primary-light dark:text-primary-light' 
+                  : 'border-transparent text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+              }`}
+            >
+              About
+            </button>
+            <button 
+              onClick={() => setActiveTab('details')}
+              className={`py-4 px-6 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${
+                activeTab === 'details' 
+                  ? 'border-primary text-primary dark:border-primary-light dark:text-primary-light' 
+                  : 'border-transparent text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+              }`}
+            >
+              Event Details
+            </button>
+            <button 
+              onClick={() => setActiveTab('location')}
+              className={`py-4 px-6 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${
+                activeTab === 'location' 
+                  ? 'border-primary text-primary dark:border-primary-light dark:text-primary-light' 
+                  : 'border-transparent text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+              }`}
+            >
+              Location
+            </button>
+            <button 
+              onClick={() => setActiveTab('organizer')}
+              className={`py-4 px-6 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${
+                activeTab === 'organizer' 
+                  ? 'border-primary text-primary dark:border-primary-light dark:text-primary-light' 
+                  : 'border-transparent text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+              }`}
+            >
+              Organizer
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="md:col-span-2">
-            <div className="card p-6 mb-6">
-              <h2 className="text-xl font-bold mb-4">About This Event</h2>
-              <p className="text-surface-800 dark:text-surface-200 whitespace-pre-line">
-                {event.longDescription || event.description}
-              </p>
-            </div>
+          <div className="lg:col-span-2 space-y-6">
+            {/* About Tab */}
+            {activeTab === 'about' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card p-6 md:p-8"
+              >
+                <h2 className="text-2xl font-bold mb-6">About This Event</h2>
+                <p className="text-surface-800 dark:text-surface-200 whitespace-pre-line leading-relaxed">
+                  {event.longDescription || event.description}
+                </p>
+                {event.imageUrl && (
+                  <div className="mt-8 rounded-xl overflow-hidden">
+                    <img 
+                      src={event.imageUrl} 
+                      alt={event.title} 
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
+              </motion.div>
+            )}
 
-            <div className="card p-6 mb-6">
-              <h2 className="text-xl font-bold mb-4">Event Details</h2>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="text-primary dark:text-primary-light mr-3 mt-1">
-                    <CalendarIcon size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Date & Time</h3>
-                    <p className="text-surface-600 dark:text-surface-400">
-                      {formatDate(event.date)} - {event.endDate ? formatDate(event.endDate) : 'N/A'}
-                    </p>
-                    <p className="text-surface-600 dark:text-surface-400">
-                      {formatTime(event.date)} - {event.endDate ? formatTime(event.endDate) : 'Until completion'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="text-primary dark:text-primary-light mr-3 mt-1">
-                    <MapPinIcon size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Location</h3>
-                    <p className="text-surface-600 dark:text-surface-400">{event.location}</p>
-                    <p className="text-surface-600 dark:text-surface-400">{event.address}</p>
+            {/* Details Tab */}
+            {activeTab === 'details' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="card p-6 md:p-8">
+                  <h2 className="text-2xl font-bold mb-6">Date & Time</h2>
+                  <div className="flex items-start">
+                    <div className="text-primary dark:text-primary-light mr-4 mt-1 rounded-full bg-primary/10 dark:bg-primary-dark/20 p-3">
+                      <CalendarIcon size={24} />
+                    </div>
+                    <div>
+                      <div className="mb-4">
+                        <h3 className="font-bold text-lg">Start</h3>
+                        <p className="text-surface-600 dark:text-surface-400">
+                          {formatDate(event.date)} at {formatTime(event.date)}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="font-bold text-lg">End</h3>
+                        <p className="text-surface-600 dark:text-surface-400">
+                          {event.endDate ? `${formatDate(event.endDate)} at ${formatTime(event.endDate)}` : 'Until completion'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {event.amenities && event.amenities.length > 0 && (
-                  <div className="flex items-start">
-                    <div className="text-primary dark:text-primary-light mr-3 mt-1">
-                      <InfoIcon size={20} />
+                  <div className="card p-6 md:p-8">
+                    <h2 className="text-2xl font-bold mb-6">Amenities</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {event.amenities.map((amenity, index) => {
+                        const AmenityIcon = getIcon(amenity.includes('Food') ? 'Utensils' : 
+                                                  amenity.includes('Drink') ? 'Coffee' :
+                                                  amenity.includes('Wi-Fi') ? 'Wifi' :
+                                                  amenity.includes('Parking') ? 'Car' :
+                                                  amenity.includes('Restroom') ? 'Bath' :
+                                                  amenity.includes('Accessible') ? 'Accessibility' :
+                                                  amenity.includes('Aid') ? 'FirstAid' : 
+                                                  'Check');
+                        
+                        return (
+                          <div key={index} className="flex items-center p-4 bg-surface-100 dark:bg-surface-700 rounded-xl">
+                            <div className="bg-white dark:bg-surface-600 p-2 rounded-lg mr-3 text-primary dark:text-primary-light">
+                              <AmenityIcon size={18} />
+                            </div>
+                            <span className="font-medium text-sm">{amenity}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div>
-                      <h3 className="font-semibold">Amenities</h3>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {event.amenities.map((amenity, index) => (
-                          <span 
-                            key={index}
-                            className="bg-surface-100 dark:bg-surface-700 px-3 py-1 rounded-full text-sm"
-                          >
-                            {amenity}
-                          </span>
-                        ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Location Tab */}
+            {activeTab === 'location' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card p-6 md:p-8"
+              >
+                <h2 className="text-2xl font-bold mb-6">Event Location</h2>
+                <div className="flex items-start">
+                  <div className="text-primary dark:text-primary-light mr-4 mt-1 rounded-full bg-primary/10 dark:bg-primary-dark/20 p-3">
+                    <MapPinIcon size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{event.location}</h3>
+                    <p className="text-surface-600 dark:text-surface-400 mb-6">{event.address}</p>
+                    
+                    <div className="aspect-video w-full bg-surface-200 dark:bg-surface-700 rounded-xl overflow-hidden relative">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <CompassIcon size={48} className="text-surface-400 dark:text-surface-500" />
+                        <span className="absolute font-medium text-surface-500 dark:text-surface-400 mt-16">Map preview</span>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="card p-6">
-              <h2 className="text-xl font-bold mb-4">Organizer</h2>
-              <div className="flex items-start">
-                {event.organizer.logo && (
-                  <img 
-                    src={event.organizer.logo} 
-                    alt={event.organizer.name} 
-                    className="w-16 h-16 rounded-lg object-cover mr-4"
-                  />
-                )}
-                <div>
-                  <h3 className="font-semibold text-lg">{event.organizer.name}</h3>
-                  <p className="text-surface-600 dark:text-surface-400 mb-3">
-                    {event.organizer.description}
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm">
-                      <MailIcon size={16} className="text-surface-500 mr-2" />
-                      <a href={`mailto:${event.organizer.contactEmail}`} className="text-primary dark:text-primary-light hover:underline">
-                        {event.organizer.contactEmail}
-                      </a>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <PhoneIcon size={16} className="text-surface-500 mr-2" />
-                      <a href={`tel:${event.organizer.contactPhone}`} className="text-primary dark:text-primary-light hover:underline">
-                        {event.organizer.contactPhone}
-                      </a>
-                    </div>
+                    
+                    <a 
+                      href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center text-primary dark:text-primary-light hover:underline"
+                    >
+                      <MapPinIcon size={16} className="mr-1" />
+                      View on Google Maps
+                    </a>
                   </div>
                 </div>
-              </div>
+              </motion.div>
+            )}
+
+            {/* Organizer Tab */}
+            {activeTab === 'organizer' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card p-6 md:p-8"
+              >
+                <h2 className="text-2xl font-bold mb-6">Event Organizer</h2>
+          <button 
+                  className="flex items-start w-full"
+                >
+                  <div className="flex items-start">
+                    {event.organizer.logo ? (
+                      <img 
+                        src={event.organizer.logo} 
+                        alt={event.organizer.name} 
+                        className="w-20 h-20 rounded-xl object-cover mr-5"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-primary/10 dark:bg-primary-dark/20 flex items-center justify-center mr-5">
+                        <UserIcon size={32} className="text-primary dark:text-primary-light" />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-bold text-xl">{event.organizer.name}</h3>
+                      <p className="text-surface-600 dark:text-surface-400 mt-1 mb-4 leading-relaxed">
+                        {event.organizer.description}
+                      </p>
+                      
+                      <div className="space-y-3">
+                        <a 
+                          href={`mailto:${event.organizer.contactEmail}`} 
+                          className="flex items-center py-2 px-3 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
+                        >
+                          <div className="bg-white dark:bg-surface-600 p-1.5 rounded-md mr-3 text-primary dark:text-primary-light">
+                            <MailIcon size={18} />
+                          </div>
+                          <span className="font-medium">{event.organizer.contactEmail}</span>
+                        </a>
+                        
+                        <a 
+                          href={`tel:${event.organizer.contactPhone}`}
+                          className="flex items-center py-2 px-3 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
+                        >
+                          <div className="bg-white dark:bg-surface-600 p-1.5 rounded-md mr-3 text-primary dark:text-primary-light">
+                            <PhoneIcon size={18} />
+                          </div>
+                          <span className="font-medium">{event.organizer.contactPhone}</span>
+                        </a>
+                      </div>
+                    </div>
             </div>
+                </button>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar - Ticket Purchase */}
-          <div className="md:col-span-1">
-            <div className="card p-6 sticky top-20">
-              <h2 className="text-xl font-bold mb-4 flex items-center">
-                <TicketIcon size={20} className="text-primary dark:text-primary-light mr-2" />
+          <div className="lg:col-span-1">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card p-6 md:p-8 sticky top-20"
+            >
+              <h2 className="text-xl font-bold mb-6 flex items-center">
+                <TicketIcon size={22} className="text-primary dark:text-primary-light mr-3" />
                 Reserve Tickets
               </h2>
 
               <div className="space-y-4 mb-6">
                 {event.ticketOptions.map(ticket => (
-                  <div 
+                        <motion.div 
                     key={ticket.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                          className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
                       selectedTicket === ticket.id 
-                        ? 'border-primary dark:border-primary-light bg-primary bg-opacity-5 dark:bg-opacity-10' 
-                        : 'border-surface-200 dark:border-surface-700 hover:border-primary dark:hover:border-primary-light'
+                              ? 'border-primary dark:border-primary-light bg-primary/5 dark:bg-primary-dark/10' 
+                              : 'border-surface-200 dark:border-surface-700 hover:border-primary/50 dark:hover:border-primary-light/50'
                     }`}
                     onClick={() => setSelectedTicket(ticket.id)}
-                  >
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold">{ticket.name}</h3>
-                      <span className="font-bold text-lg">${ticket.price.toFixed(2)}</span>
+                            <h3 className="font-bold text-lg">{ticket.name}</h3>
+                            <span className="font-bold text-xl text-primary dark:text-primary-light">${ticket.price.toFixed(2)}</span>
                     </div>
                     <p className="text-surface-600 dark:text-surface-400 text-sm">
                       {ticket.description}
                     </p>
                     {selectedTicket === ticket.id && (
-                      <div className="text-primary dark:text-primary-light text-sm mt-2 flex items-center">
-                        <CheckIcon size={16} className="mr-1" />
+                            <div className="text-primary dark:text-primary-light font-medium mt-3 flex items-center">
+                              <CheckCircleIcon size={18} className="mr-2" />
                         Selected
                       </div>
                     )}
-                  </div>
+                        </motion.div>
                 ))}
               </div>
 
-              <button 
+              <motion.button 
                 className="btn btn-primary w-full text-lg font-semibold" 
                 onClick={handleReserve}
-              >
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
                 Reserve Now
-              </button>
+              </motion.button>
 
-              <p className="text-center text-sm text-surface-500 dark:text-surface-400 mt-4">
-                Secure payment processed by EventEase
-              </p>
-            </div>
+              <div className="mt-4 flex items-center justify-center text-surface-500 dark:text-surface-400">
+                <InfoIcon size={16} className="mr-2" />
+                <p className="text-sm">Secure payment processed by EventEase</p>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
