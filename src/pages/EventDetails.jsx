@@ -362,7 +362,7 @@ export default function EventDetails() {
                   </div>
                 )}
 
-            )}
+              </motion.div>
             )}
 
             {/* Details Tab */}
